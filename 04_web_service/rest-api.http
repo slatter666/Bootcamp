@@ -1,0 +1,44 @@
+POST http://localhost:8080/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "pwd": "123456"
+}
+
+<> 2022-05-20T190441.200.json
+
+
+###
+POST http://localhost:8080/reg_exp
+Content-Type: application/json
+
+{
+  "birth_data": ["张三的生日是1990年1月15日", "李四出生年月： 1996-10-21", "服务器的地址是8623.83.40"],
+  "identity_number": ["张三的身份证号为：3354197009*******X", "李四的护照号：P3529****"],
+  "email":["电子邮箱：xiayu_li@shannonai.com","张三的电子信箱为：zhangsan.sde@gmail.com"],
+  "percentage":["张三直接持有腾讯25.78%的股份，通过香侬科技间接持有腾讯52.90%的股份"],
+  "share_holder":["控股股东和实际控制人的情况简介","实际控制人、控股股东的联合声明承诺持有发行人股票至少三年"]
+}
+
+<> 2022-05-20T190436.200.json
+
+
+###
+POST http://localhost:8080/word_tokenize
+Content-Type: application/json
+
+{
+  "sentence": "欢迎加入香侬科技！"
+}
+
+<> 2022-05-20T190432.200.json
+
+
+###
+GET http://localhost:8080/log_analyze
+Accept: application/json
+
+<> 2022-05-20T190130.200.json
+
+
