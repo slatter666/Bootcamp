@@ -121,27 +121,3 @@ if __name__ == '__main__':
         result = model(input_ids, attention_mask, labels)
         print("model(batch):", result)
         break
-
-    # 设置训练参数
-    # arguments = TrainingArguments(
-    #     output_dir="checkpoints",
-    #     per_device_train_batch_size=32,
-    #     per_device_eval_batch_size=32,
-    #     num_train_epochs=3,
-    #     evaluation_strategy="epoch",  # run validation at the end of each epoch
-    #     save_strategy="epoch",
-    #     learning_rate=2e-5,
-    #     load_best_model_at_end=True,
-    #     seed=123
-    # )
-    #
-    # trainer = Trainer(
-    #     model=model,
-    #     args=arguments,
-    #     train_dataset=train_dataloader,
-    #     eval_dataset=test_dataloader,  # change to test when you do your final evaluation!
-    #     tokenizer=tokenizer,
-    #     compute_metrics=compute_metrics
-    # )
-    #
-    # trainer.train()
