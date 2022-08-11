@@ -33,7 +33,7 @@ if __name__ == '__main__':
     val_data_path = '../../shannon-bootcamp-data/06_text_classification/valid_data_v3.json'
     test_data_path = '../../shannon-bootcamp-data/06_text_classification/test_data_v3.json'
     processer = DataProcess(train_data_path, val_data_path, test_data_path, batch_size=_batch_size)
-    train_dataloder, val_dataloader, test_dataloader = processer.get_dataloader()
+    train_dataloader, val_dataloader, test_dataloader = processer.get_dataloader()
 
     # model
     model = BiLSTMModel4(vocab_size=len(processer.vocab), embed_size=_embed_dim, hidden_size=_hidden_dim,
@@ -51,7 +51,7 @@ if __name__ == '__main__':
     )
     trainer = pl.Trainer(accelerator='gpu', devices=1, max_epochs=_epochs, callbacks=[checkpoint_callback],
                          log_every_n_steps=10)
-    trainer.fit(model, train_dataloder, val_dataloader)
+    trainer.fit(model, train_dataloader, val_dataloader)
 
     for path in os.listdir(checkpoint_path):
         file_path = checkpoint_path + '/' + path

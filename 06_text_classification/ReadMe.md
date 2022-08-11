@@ -25,5 +25,9 @@
    - version1：直接用所有词语作为特征，使用BiLSTM最后的ht输出送入全连接层进行预测，效果一般test_F1仅80%
    - version2：同样用所有词语作为特征，使用BiLSTM所有hidden累加标准化后送入全连接层，效果类似version1，test_F1仅81%
    - version3：受到之后的词袋模型启发，取字作为特征，模型结构采用version1模型，性能得到提升，test_F1达84%
-   - version4：受到之后的词袋模型启发，取字作为特征，模型结构采用version1模型，性能得到提升，test_F1达85.4%
+   - version4：受到之后的词袋模型启发，取字作为特征，模型结构采用version2模型，性能得到提升，test_F1达85.4%
 3. 使用词袋模型实现情感分类，使用字作为特征，模型结构较为简单将所有字的Embedding累加取平均，然后送入全连接层进行预测，test_F1超过85%，调参过程中发现最高可到86.2%
+4. 使用字作为特征，模型采用BERT微调了5轮，保存了三个模型
+   - val_loss=0.18, val_acc=0.93, val_F1=0.92, test_acc=0.88, test_F1=0.867
+   - val_loss=0.18, val_acc=0.92, val_F1=0.92, test_acc=0.90, test_F1=0.88
+   - val_loss=0.41, val_acc=0.90, val_F1=0.90, test_acc=0.896, test_F1=0.895
