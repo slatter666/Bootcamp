@@ -1,4 +1,4 @@
-# NLP B噢噢tcamp
+# NLP Bootcamp
 
 共两个bootcamp———NLP入门bootcamp和shannon-bootcamp
 
