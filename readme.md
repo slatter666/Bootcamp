@@ -14,7 +14,7 @@
 
 ### 英语练习
 
-上coursera的课，这里可以根据自己现有的英语基础上不同的课，比如稍微基础点的是[Duke的English Composition](https://www.coursera.org/learn/english-composition)，进阶一点的就是Stanford的[Scientific Writing](https://www.coursera.org/learn/sciwrite)
+上coursera的课，这里可以根据自己现有的英语基础上不同的课，比如稍微基础点的是Duke的[English Composition](https://www.coursera.org/learn/english-composition)，进阶一点的就是Stanford的[Scientific Writing](https://www.coursera.org/learn/sciwrite)
 
 
 
@@ -31,7 +31,7 @@
 
 3. 机器翻译分别实现 LSTM attention和transformers
 
-   机器翻译分别实现 LSTM attention（Effective approaches to attention-based neural machine translation） 和 transformers 在german-english 翻译 （[数据下载地址](http://cs.stanford.edu/~bdlijiwei/process_data.tar.gz)。LSTM 需要到 bleu值27以上，transformers 最好可以超过30。
+   机器翻译分别实现 LSTM attention（Effective approaches to attention-based neural machine translation） 和 transformers 在german-english 翻译 （[数据下载地址](http://cs.stanford.edu/~bdlijiwei/process_data.tar.gz)，LSTM 需要到 bleu值27以上，transformers 最好可以超过30。
 
 4. 复现BERT在GLUE，NLI以及NER上结果
 
