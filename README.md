@@ -1,18 +1,11 @@
-# shannon_bootcamp
+# NLP B噢噢tcamp
 
-共6道题目，10天时间
+共两个bootcamp———NLP入门bootcamp和shannon-bootcamp
 
-## 环境
-1. python 3.6+
-2. 需要一些机器学习的包，如`pytorch`等，请自行选择
+## NLP入门bootcamp
+这个相对来说更难，主要是论文复现工作
 
-## 数据
+## shannon-bootcamp
+这个相对来说更基础，要简单一些
 
-暂不公开
-
-
-
-## 流程
-1. 完成题目
-3. 提交代码到自己 repo，请 mentor 审代码，不要提 merge request
-4. 提交简单报告给 mentor
+具体细节参照对应分支中的readme
