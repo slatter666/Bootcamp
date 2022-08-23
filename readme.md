@@ -22,7 +22,7 @@
 
 1. 学会使用SVM进行分类
 
-   运用[SVM_light](http://svmlight.joachims.org/)开源包分别对20newsgroup, imdb movie dataset 进行分类。对比运用 unigram, bigram, unigram+bigram 以及Glove 840B词向量平均 作为feature的分类结果。
+   运用[SVM_light](http://svmlight.joachims.org/)开源包分别对20 News Group, IMDB Movie Review进行分类。对比运用 unigram, bigram, unigram+bigram 以及Glove 840B词向量平均 作为feature的分类结果
 
 2. 使用双向LSTM对于 Stanford Sentiment Treebank (SST) 进行分类
 
@@ -31,7 +31,7 @@
 
 3. 机器翻译分别实现 LSTM attention和transformers
 
-   机器翻译分别实现 LSTM attention（Effective approaches to attention-based neural machine translation） 和 transformers 在german-english 翻译 （[数据下载地址](http://cs.stanford.edu/~bdlijiwei/process_data.tar.gz)，LSTM 需要到 bleu值27以上，transformers 最好可以超过30。
+   机器翻译分别实现 LSTM attention（Effective approaches to attention-based neural machine translation） 和 transformers 在german-english 翻译 （[数据下载地址](http://cs.stanford.edu/~bdlijiwei/process_data.tar.gz)，LSTM 需要到 bleu值27以上，transformers 最好可以超过30
 
 4. 复现BERT在GLUE，NLI以及NER上结果
 
