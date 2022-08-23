@@ -174,5 +174,5 @@ data
 
 
 
-**致谢：**在进行多分类时查到了[这篇文章](https://gohom.win/2015/08/12/svmlight/)才发现SVM-Multiclass
+**致谢：** 在进行多分类时查到了[这篇文章](https://gohom.win/2015/08/12/svmlight/)才发现SVM-Multiclass
 
