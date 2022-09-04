@@ -31,7 +31,7 @@
 6. datasetSplit.txt包含了句子index以及对应的label，label表示所属数据集：1属于train、2属于test、3属于dev。当然你可以自行划分数据集，但是如果你要用SST做实验发论文做比较那么就需要根据它的方式来划分，算是公平比较吧
 
 #### 2. 数据预处理
-由于datasetSentences.txt中的句子可能会存在“AmÃ©lie”这种字符串里面存在一些法语符号以及一些标签“-LRB- A -RRB-”这种和dictionary对不上所以用SOStr.txt恢复出来的句子做映射。因此需要用到的文件有：dictionary.txt、sentiment_labels.txt、SOStr.txt、STree.txt、datasetSplit.txt
+由于datasetSentences.txt中的句子可能会存在“AmÃ©lie”这种字符串，里面存在一些法语符号以及一些标签“-LRB- A -RRB-”和dictionary对不上，所以用SOStr.txt恢复出来的句子做映射。因此需要用到的文件有：dictionary.txt、sentiment_labels.txt、SOStr.txt、STree.txt、datasetSplit.txt
 
 可以直接运行下面脚本得到最终处理好的数据，处理过程分为四步：分割数据集、根据trainSentence.txt生成训练集词汇表、根据语法树生成短语训练集train.txt、最后生成数据集label
 ```shell
@@ -84,7 +84,7 @@ data
 
 #### 3. 训练模型
 
-模型使用2-layer Bidirectional LSTM，根据论文使用最后的LSTM hidden state进行分类，具体模型结构查看```model.py```代码，为了增加灵活性将layer参数暴露通过外部进行控制
+模型使用2-layer Bidirectional LSTM，根据论文使用最后的LSTM hidden state进行分类，具体模型结构查看```model.py```代码
 
 运行以下脚本可以开始训练(训练代码查看```run.py```)
 ```shell
