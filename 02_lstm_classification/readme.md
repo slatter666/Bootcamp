@@ -33,11 +33,11 @@
 #### 2. 数据预处理
 由于datasetSentences.txt中的句子可能会存在“AmÃ©lie”这种字符串，里面存在一些法语符号以及一些标签“-LRB- A -RRB-”和dictionary对不上，所以用SOStr.txt恢复出来的句子做映射。因此需要用到的文件有：dictionary.txt、sentiment_labels.txt、SOStr.txt、STree.txt、datasetSplit.txt
 
-可以直接运行下面脚本得到最终处理好的数据，处理过程分为四步：分割数据集、根据trainSentence.txt生成训练集词汇表、根据语法树生成短语训练集train.txt、最后生成数据集label
+直接执行以下命令得到最终处理好的数据，处理过程分为四步：分割数据集、根据trainSentence.txt生成训练集词汇表、根据语法树生成短语训练集train.txt、最后生成数据集label
 ```shell
 sh generate.sh
 ```
-可以运行以下命令查看根据语法树构建句子所有phrase的示例
+可以执行以下命令查看根据语法树构建句子所有phrase的示例
 ```shell
 python utils.py
 ```
@@ -86,7 +86,7 @@ data
 
 模型使用2-layer Bidirectional LSTM，根据论文使用最后的LSTM hidden state进行分类，具体模型结构查看```model.py```代码
 
-运行以下脚本可以开始训练(训练代码查看```run.py```)
+执行以下命令开始训练(训练代码查看```run.py```)
 ```shell
 sh run.sh
 ```
