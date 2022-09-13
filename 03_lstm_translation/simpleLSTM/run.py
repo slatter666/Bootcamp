@@ -1,0 +1,140 @@
+"""
+# FileName   : run.py
+# Author     ：Slatter
+# Time       ：2022/9/12 12:15
+# Description：
+"""
+import torch
+from torch import nn, optim
+from torch.utils.data import DataLoader
+from utils import Vocab, TranslationDataset
+from functools import partial
+from model import SimpleNMT
+from xmlrpc.client import MAXINT
+
+DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+BATCH_SIZE = 64
+EMBED_SIZE = 200
+HIDDEN_SIZE = 120
+MAX_LEN = 50
+LR = 0.5
+WEIGHT_DECAY = 0.01
+EPOCH = 5
+
+src_vocab_file = "../data/process_data/de.dict"
+tgt_vocab_file = "../data/process_data/en.dict"
+source_vocab = Vocab.load_from_file(src_vocab_file)
+target_vocab = Vocab.load_from_file(tgt_vocab_file)
+
+
+def collate_batch(batch, src_vocab, tgt_vocab):
+    max_src_len, max_tgt_len = -1, -1
+    src_batch, tgt_batch = [], []
+    src_lengths, tgt_lengths = [], []
+    for source, target in batch:
+        max_src_len = max(max_src_len, len(source))
+        max_tgt_len = max(max_tgt_len, len(target))
+        src_batch.append(source)
+        tgt_batch.append(target)
+        src_lengths.append(len(source))
+        tgt_lengths.append(len(target))
+
+    # padding
+    for i in range(len(src_batch)):
+        src_batch[i] = src_batch[i] + [src_vocab.word2idx["<pad>"]] * (max_src_len - len(src_batch[i]))
+        tgt_batch[i] = tgt_batch[i] + [tgt_vocab.word2idx["<pad>"]] * (max_tgt_len - len(tgt_batch[i]))
+
+    src_batch = torch.tensor(src_batch, dtype=torch.int64).to(DEVICE)
+    tgt_batch = torch.tensor(tgt_batch, dtype=torch.int64).to(DEVICE)
+    return src_batch, src_lengths, tgt_batch, tgt_lengths
+
+
+train_file = "../data/process_data/train.txt"
+dev_file = "../data/process_data/dev.txt"
+test_file = "../data/process_data/test.txt"
+train_dataset = TranslationDataset.load_from_file(train_file)
+dev_dataset = TranslationDataset.load_from_file(dev_file)
+test_dataset = TranslationDataset.load_from_file(test_file)
+
+collate_fn = partial(collate_batch, src_vocab=source_vocab, tgt_vocab=target_vocab)  # 这里必须一对一指定参数
+train_dataloader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True, collate_fn=collate_fn)
+val_dataloader = DataLoader(dev_dataset, batch_size=BATCH_SIZE, shuffle=False, collate_fn=collate_fn)
+test_dataloader = DataLoader(dev_dataset, batch_size=BATCH_SIZE, shuffle=False, collate_fn=collate_fn)
+
+model = SimpleNMT(source_vocab, target_vocab, EMBED_SIZE, HIDDEN_SIZE, MAX_LEN, DEVICE).to(DEVICE)
+optimizer = optim.Adam(model.parameters(), lr=LR, weight_decay=WEIGHT_DECAY)
+criterion = nn.CrossEntropyLoss()
+
+
+def compute_batch_loss(logits, target, lengths):
+    """
+    计算loss
+    :param logits: 计算得到的logits值    (batch_size, MAX_LEN or max_tgt_Len, tgt_vocab_size)
+    :param target: 实际token值       (batch_size, max_tgt_len)
+    :param lengths: 实际tokens长度   (batch_size)
+    :return:
+    """
+    total_loss = torch.tensor(0, dtype=torch.float32).to(DEVICE)
+    for i in range(len(lengths)):
+        translation = logits[i, :lengths[i], :]  # (actual_tgt_len, tgt_vocab_size)
+        ground_truth = target[i, :lengths[i]]  # (actual_tgt_len)
+        loss = criterion(translation, ground_truth)
+        total_loss += loss
+    return total_loss
+
+
+def train():
+    min_loss = MAXINT
+    for i in range(1, EPOCH + 1):
+        train_loss = 0
+        model.train()
+        for idx, batch in enumerate(train_dataloader):
+            optimizer.zero_grad()
+            source, src_lengths, target, tgt_lengths = batch
+            logits, tokens = model(source, src_lengths, target, tgt_lengths, mode="train")
+            loss = compute_batch_loss(logits, target, tgt_lengths)
+            train_loss += loss
+
+            loss.backward()
+            optimizer.step()
+            print("Train Epoch{}, iter: {}/{}: iter_loss:{:.2f}".format(i, idx, len(train_dataloader), loss))
+
+        print("Train Epoch{}: train_loss:{:.2f}".format(i, train_loss))
+
+        with torch.no_grad():
+            val_loss = 0
+            model.eval()
+            for idx, batch in enumerate(val_dataloader):
+                source, src_lengths, target, tgt_lengths = batch
+                logits, tokens = model(source, src_lengths, target, tgt_lengths, mode="val")
+                loss = compute_batch_loss(logits, target, tgt_lengths)
+                val_loss += loss
+
+        print("Epoch{}: val_loss:{:.2f}".format(i, val_loss))
+
+        if min_loss > val_loss:
+            min_loss = val_loss
+            torch.save(model.state_dict(), 'best.pth')
+
+    print("The best model's loss:", min_loss)
+
+
+# train()
+
+model.load_state_dict(torch.load("best.pth"))
+
+
+def test():
+    with torch.no_grad():
+        test_loss = 0
+        model.eval()
+        for idx, batch in enumerate(test_dataloader):
+            source, src_lengths, target, tgt_lengths = batch
+            logits, tokens = model(source, src_lengths, target, tgt_lengths, mode="test")
+            loss = compute_batch_loss(logits, target, tgt_lengths)
+            test_loss += loss
+
+        print("test_loss:{:.2f}".format(test_loss))
+
+
+test()
