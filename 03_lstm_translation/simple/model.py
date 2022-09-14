@@ -4,10 +4,12 @@
 # Time       ：2022/9/5 19:36
 # Description：
 """
+import sys
 from typing import List
 import torch
 from torch import nn
-from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
+from torch.nn.utils.rnn import pack_padded_sequence
+sys.path.append("..")
 from utils import Vocab
 
 
@@ -88,7 +90,8 @@ class SimpleNMT(nn.Module):
         res_tokens = []
 
         # 前一个输出 (batch_size, embed_size) 一开始是<SOS>
-        o_prev = self.tgt_embedding(torch.tensor([self.tgt_vocab.word2idx["<SOS>"]] * enc_hidden.size(0)).to(self.device))
+        o_prev = self.tgt_embedding(
+            torch.tensor([self.tgt_vocab.word2idx["<SOS>"]] * enc_hidden.size(0)).to(self.device))
         if mode == "train":
             # 首先生成第一个词然后使用teacher forcing
             dec_hidden, dec_cell = self.decoder(o_prev, (dec_hidden, dec_cell))  # 注意这里传参要用元组
@@ -96,7 +99,7 @@ class SimpleNMT(nn.Module):
             res_logits.append(rec_out)
             for piece in torch.split(target_embeded, 1):  # (1, batch_size, embed_size)
                 o_prev = piece.squeeze(dim=0)  # (batch_size, embed_size)
-                dec_hidden, dec_cell = self.decoder(o_prev,( dec_hidden, dec_cell))  # (batch_size, hidden_size)
+                dec_hidden, dec_cell = self.decoder(o_prev, (dec_hidden, dec_cell))  # (batch_size, hidden_size)
                 rec_out = self.o_fc(dec_hidden)  # (batch_size, tgt_vocab_size)
                 res_logits.append(rec_out)
                 predict_token = rec_out.argmax(dim=1)
@@ -112,6 +115,6 @@ class SimpleNMT(nn.Module):
 
         # res_logits和res_tokens类型为List[torch.Tensor], 转为Tensor
         # res_logits  (MAX_LEN or max_tgt_len, batch_size, tgt_vocab_size) -> (batch_size, MAX_LEN or max_tgt_len, tgt_vocab_size)
-        res_logits = torch.stack(res_logits, dim=0).transpose(0, 1)   #
-        res_tokens = torch.stack(res_tokens, dim=1)   # (batch_size, MAX_LEN or max_tgt_len)
+        res_logits = torch.stack(res_logits, dim=0).transpose(0, 1)  #
+        res_tokens = torch.stack(res_tokens, dim=1)  # (batch_size, MAX_LEN or max_tgt_len)
         return res_logits, res_tokens

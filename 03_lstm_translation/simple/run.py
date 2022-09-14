@@ -4,22 +4,43 @@
 # Time       ：2022/9/12 12:15
 # Description：
 """
+import sys
+
 import torch
 from torch import nn, optim
 from torch.utils.data import DataLoader
-from utils import Vocab, TranslationDataset
 from functools import partial
 from model import SimpleNMT
 from xmlrpc.client import MAXINT
+import argparse
 
-DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-BATCH_SIZE = 64
-EMBED_SIZE = 200
-HIDDEN_SIZE = 120
-MAX_LEN = 50
-LR = 0.5
-WEIGHT_DECAY = 0.01
-EPOCH = 5
+sys.path.append("..")
+from utils import Vocab, TranslationDataset
+
+parser = argparse.ArgumentParser(prog="simple seq2seq")
+parser.add_argument("--device", choices=["cpu", "gpu"], default="cpu",
+                    help="choose device to train the model, cpu or gpu")
+parser.add_argument("--batch", type=int, default=32, help="choose batch size")
+parser.add_argument("--embed-size", type=int, default=200, help="choose embedding size")
+parser.add_argument("--hidden-size", type=int, default=120, help="choose hidden size")
+parser.add_argument("--max-len", type=int, default=50, help="choose generated translation's max length")
+parser.add_argument("--lr", type=float, default=0.05, help="choose learning rate")
+parser.add_argument("--weight-decay", type=float, default=0.01, help="choose weight decay")
+parser.add_argument("--epoch", type=int, default=5, help="choose epoch of training")
+
+args = parser.parse_args()
+
+if args.device == "gpu":
+    DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+else:
+    DEVICE = torch.device("cpu")
+BATCH_SIZE = args.batch
+EMBED_SIZE = args.embed_size
+HIDDEN_SIZE = args.hidden_size
+MAX_LEN = args.max_len
+LR = args.lr
+WEIGHT_DECAY = args.weight_decay
+EPOCH = args.epoch
 
 src_vocab_file = "../data/process_data/de.dict"
 tgt_vocab_file = "../data/process_data/en.dict"
@@ -125,6 +146,7 @@ model.load_state_dict(torch.load("best.pth"))
 
 
 def test():
+    rec = []
     with torch.no_grad():
         test_loss = 0
         model.eval()
@@ -133,8 +155,10 @@ def test():
             logits, tokens = model(source, src_lengths, target, tgt_lengths, mode="test")
             loss = compute_batch_loss(logits, target, tgt_lengths)
             test_loss += loss
+        # 测试集计算平均loss
+        print("average test loss:{:.2f}".format(test_loss / len(test_dataloader)))
 
-        print("test_loss:{:.2f}".format(test_loss))
+    # 计算bleu值
 
 
 test()

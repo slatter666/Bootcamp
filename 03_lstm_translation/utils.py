@@ -6,13 +6,7 @@
 """
 from typing import List, Tuple, Dict
 from torch.utils.data import Dataset
-import argparse
-
-parser = argparse.ArgumentParser(prog="mainly check translation data")
-parser.add_argument("-i", "--index", type=int, default=-1, help="index of data")
-parser.add_argument("-l", "--length", action='store_true', help="check the total number of data")
-
-args = parser.parse_args()
+from nltk.translate.bleu_score import corpus_bleu
 
 
 class Vocab:
@@ -46,6 +40,18 @@ class Vocab:
 
     def get_token_by_word(self, word: str) -> int:
         return self.word2idx[word]
+
+    def convert_tokens_to_words(self, tokens: List[int]) -> List[str]:
+        res = []
+        for token in tokens:
+            res.append(self.get_word_by_token(token))
+        return res
+
+    def convert_words_to_tokens(self, words: List[str]) -> List[int]:
+        res = []
+        for word in words:
+            res.append(self.get_token_by_word(word))
+        return res
 
 
 class TranslationDataset(Dataset):
@@ -94,17 +100,24 @@ def check_sentence(src_vocab: Vocab, tgt_vocab: Vocab, data_path: str, check_idx
     data = TranslationDataset.load_from_file(data_path)
     assert check_idx < len(data), "ERROR:输入的index超出数据范围"
     src_tokens, tgt_tokens = data.__getitem__(check_idx)
-    src_words, tgt_words = [], []
-    for token in src_tokens:
-        src_words.append(src_vocab.get_word_by_token(token))
-
-    for token in tgt_tokens:
-        tgt_words.append(tgt_vocab.get_word_by_token(token))
+    src_words = src_vocab.convert_tokens_to_words(src_tokens)
+    tgt_words = tgt_vocab.convert_tokens_to_words(tgt_tokens)
 
     src_sentence = " ".join(src_words)
     tgt_sentence = " ".join(tgt_words)
     print("source sentence: ", src_sentence)
     print("target sentence: ", tgt_sentence)
+
+
+def compute_bleu(pairs: List[Tuple[List[int], List[int]]]) -> int:
+    """
+    计算bleu值
+    :param pairs: a list of translation pair
+    :return: bleu score
+    """
+    total = len(pairs)
+
+    pass
 
 
 if __name__ == '__main__':
@@ -115,11 +128,7 @@ if __name__ == '__main__':
 
     train_file = "data/process_data/train.txt"
 
-    if args.length:
-        train_data = TranslationDataset.load_from_file(train_file)
-        print(f"Total training data: {len(train_data)}")
-
-    index = args.index
-    if index >= 0:
-        print(f"-----------------Pair{index}-----------------")
-        check_sentence(source_vocab, target_vocab, data_path=train_file, check_idx=index)
+    nums = 5
+    for i in range(nums):
+        print(f"-----------------Pair{i}-----------------")
+        check_sentence(source_vocab, target_vocab, data_path=train_file, check_idx=i)
