@@ -6,6 +6,13 @@
 """
 from typing import List, Tuple, Dict
 from torch.utils.data import Dataset
+import argparse
+
+parser = argparse.ArgumentParser(prog="mainly check translation data")
+parser.add_argument("-i", "--index", type=int, default=-1, help="index of data")
+parser.add_argument("-l", "--length", action='store_true', help="check the total number of data")
+
+args = parser.parse_args()
 
 
 class Vocab:
@@ -31,7 +38,7 @@ class Vocab:
                 idx2word[i + 1] = word
 
         idx2word[len(word2idx)] = "<SOS>"
-        word2idx["<SOS>"] = len(word2idx)   # start of sentence
+        word2idx["<SOS>"] = len(word2idx)  # start of sentence
         return cls(word2idx, idx2word)
 
     def get_word_by_token(self, token: int) -> str:
@@ -41,7 +48,7 @@ class Vocab:
         return self.word2idx[word]
 
 
-class TranslationDataset:
+class TranslationDataset(Dataset):
     def __init__(self, pairs: List[Tuple[List[int], List[int]]]):
         self.pairs = pairs
 
@@ -74,31 +81,30 @@ class TranslationDataset:
         return cls(res)
 
 
-def check_sentence(src_vocab: Vocab, tgt_vocab: Vocab, data_path: str, check_num: int):
+def check_sentence(src_vocab: Vocab, tgt_vocab: Vocab, data_path: str, check_idx: int):
     """
     查看翻译句子对
     :param src_vocab: source language vocab
     :param tgt_vocab: target language vocab
-    :param check_num: 选择查看多少对数据
     :param data_path: 数据地址
+    :param check_num: 查看第idx个翻译句子对
     :return: 输出source sentence和target sentence
     """
-    assert check_num >= 0 and type(check_num) == int, "WARNING:请输入正整数!"
+    assert check_idx >= 0 and type(check_idx) == int, "ERROR:请输入非负整数!"
     data = TranslationDataset.load_from_file(data_path)
-    for i in range(check_num):
-        print(f"---------------Pair {i}---------------")
-        src_tokens, tgt_tokens = data.__getitem__(i)
-        src_words, tgt_words = [], []
-        for token in src_tokens:
-            src_words.append(src_vocab.get_word_by_token(token))
+    assert check_idx < len(data), "ERROR:输入的index超出数据范围"
+    src_tokens, tgt_tokens = data.__getitem__(check_idx)
+    src_words, tgt_words = [], []
+    for token in src_tokens:
+        src_words.append(src_vocab.get_word_by_token(token))
 
-        for token in tgt_tokens:
-            tgt_words.append(tgt_vocab.get_word_by_token(token))
+    for token in tgt_tokens:
+        tgt_words.append(tgt_vocab.get_word_by_token(token))
 
-        src_sentence = " ".join(src_words)
-        tgt_sentence = " ".join(tgt_words)
-        print("source sentence: ", src_sentence)
-        print("target sentence: ", tgt_sentence)
+    src_sentence = " ".join(src_words)
+    tgt_sentence = " ".join(tgt_words)
+    print("source sentence: ", src_sentence)
+    print("target sentence: ", tgt_sentence)
 
 
 if __name__ == '__main__':
@@ -108,4 +114,12 @@ if __name__ == '__main__':
     target_vocab = Vocab.load_from_file(tgt_vocab_file)
 
     train_file = "data/process_data/train.txt"
-    check_sentence(source_vocab, target_vocab, data_path=train_file, check_num=5)
+
+    if args.length:
+        train_data = TranslationDataset.load_from_file(train_file)
+        print(f"Total training data: {len(train_data)}")
+
+    index = args.index
+    if index >= 0:
+        print(f"-----------------Pair{index}-----------------")
+        check_sentence(source_vocab, target_vocab, data_path=train_file, check_idx=index)
