@@ -34,7 +34,6 @@ python utils.py
 模型及训练代码放置在对应文件夹中，大致结构如下
 ```
 .
-├── best.pth
 ├── model.py
 ├── run.py
 ├── run.sh
