@@ -6,6 +6,7 @@
 """
 import sys
 
+import nltk.translate.bleu_score
 import torch
 from torch import nn, optim
 from torch.utils.data import DataLoader
@@ -15,7 +16,7 @@ from xmlrpc.client import MAXINT
 import argparse
 
 sys.path.append("..")
-from utils import Vocab, TranslationDataset
+from utils import Vocab, TranslationDataset, format_sentence, compute_bleu
 
 parser = argparse.ArgumentParser(prog="simple seq2seq")
 parser.add_argument("--device", choices=["cpu", "gpu"], default="cpu",
@@ -140,13 +141,13 @@ def train():
     print("The best model's loss:", min_loss)
 
 
-# train()
+# train()   # 训练完成后请注释此行代码
 
 model.load_state_dict(torch.load("best.pth"))
 
 
 def test():
-    rec = []
+    rec_ref, rec_gen = [], []
     with torch.no_grad():
         test_loss = 0
         model.eval()
@@ -155,10 +156,17 @@ def test():
             logits, tokens = model(source, src_lengths, target, tgt_lengths, mode="test")
             loss = compute_batch_loss(logits, target, tgt_lengths)
             test_loss += loss
+
+            # 转换数据用于计算bleu-score
+            t1, t2 = format_sentence(target_vocab, target.tolist(), tgt_lengths, tokens.tolist())
+            rec_ref += t1
+            rec_gen += t2
         # 测试集计算平均loss
         print("average test loss:{:.2f}".format(test_loss / len(test_dataloader)))
 
     # 计算bleu值
+    bleu_score = compute_bleu(rec_ref, rec_gen)
+    print("BLEU SCORE: {}".format(bleu_score))
 
 
 test()

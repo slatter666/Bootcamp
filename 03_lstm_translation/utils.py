@@ -5,8 +5,9 @@
 # Description：
 """
 from typing import List, Tuple, Dict
-from torch.utils.data import Dataset
+
 from nltk.translate.bleu_score import corpus_bleu
+from torch.utils.data import Dataset
 
 
 class Vocab:
@@ -109,15 +110,48 @@ def check_sentence(src_vocab: Vocab, tgt_vocab: Vocab, data_path: str, check_idx
     print("target sentence: ", tgt_sentence)
 
 
-def compute_bleu(pairs: List[Tuple[List[int], List[int]]]) -> int:
+def format_sentence(vocab: Vocab, target: List[List[int]], length: List[int], generate: List[int]) -> Tuple[List[List[str]]]:
+    """
+    将padding后的target tokens去掉<pad>，将generate的句子去掉结尾后的内容
+    :param vocab: target language vocabulary
+    :param target: reference sentence
+    :param length: reference sentence's actual length
+    :param generate: generated sentence
+    :return: res_tgt: list of references     res_gen: hypothesis
+    """
+    res_tgt, res_gen = [], []
+    for j in range(len(length)):
+        # convert padded reference to original reference
+        cur_tgt_tokens = target[j][:length[j]]
+        cur_tgt_words = vocab.convert_tokens_to_words(cur_tgt_tokens)
+        res_tgt.append([cur_tgt_words])
+
+        # process generated sentence
+        eos = None
+        cur_gen_tokens = generate[j]
+        cur_gen_words = vocab.convert_tokens_to_words(cur_gen_tokens)
+        for k in range(len(cur_gen_words)):
+            if cur_gen_words[k] == '.' or cur_gen_words[k] == '?':
+                eos = cur_gen_words[k]
+                cur_gen_words = cur_gen_words[:k]  # 这里是去掉了'.'或者'?'的，因为generate sentence可能没有'.'，最后一起加回去
+                break
+
+        if eos is None:
+            cur_gen_words.append(".")
+        else:
+            cur_gen_words.append(eos)
+        res_gen.append(cur_gen_words)
+    return res_tgt, res_gen
+
+
+def compute_bleu(ref: List[List[List[str]]], hypo: List[List[str]]) -> float:
     """
     计算bleu值
-    :param pairs: a list of translation pair
+    :param ref: list of references
+    :param hypo: hypothesis sentences
     :return: bleu score
     """
-    total = len(pairs)
-
-    pass
+    return corpus_bleu(ref, hypo, (1, 0, 0, 0))
 
 
 if __name__ == '__main__':
