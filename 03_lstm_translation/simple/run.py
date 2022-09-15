@@ -141,7 +141,7 @@ def train():
     print("The best model's loss:", min_loss)
 
 
-# train()   # 训练完成后请注释此行代码
+train()   # 训练完成后请注释此行代码
 
 model.load_state_dict(torch.load("best.pth"))
 
