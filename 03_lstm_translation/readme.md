@@ -21,12 +21,27 @@
 - 数据集分为train.txt、dev.txt、test.txt, 已经预处理过将数据转换为了token形式，其中用|隔开，之前的内容是德语，之后的内容是英语
 - 由于数据已经处理好了，所以不需要进行数据预处理
 - 数据的token是从1开始（而不是从0开始）的，也就是de.dict文件中每行的词对应的token就是它的行号
-- 运行`python utils.py`可以查看5条翻译句子对，如果想要查看更多可以自行修改main中的nums
-
+- 依次运行下列命令可以查看5条翻译句子对，如果想要查看更多可以自行修改main中的nums
+```shell
+cd simple
+python utils.py
+```
 #### 2. 模型搭建及训练
 这里主要做两个模型进行一下对比
 + simple：基础的seq2seq模型，encoder使用BiLSTM，decoder使用LSTM
 + advanced：进阶的seq2seq模型，encoder使用BiLSTM，decoder使用LSTM，并使用Attention
 
 模型及训练代码放置在对应文件夹中，大致结构如下
+```
+.
+├── best.pth
+├── model.py
+├── run.py
+├── run.sh
+└── utils.py
+```
+这里utils.py其实内容差距不大，有些细节上的差别但是由于simple本来就是一个练手版本所以不太想改了，建议查看advanced/utils.py
 
+其中直接运行`sh run.sh`即可，可以自行修改其中的参数
+
+#### 3.模型效果

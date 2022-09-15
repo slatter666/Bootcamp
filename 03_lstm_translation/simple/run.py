@@ -4,9 +4,7 @@
 # Time       ：2022/9/12 12:15
 # Description：
 """
-import sys
 
-import nltk.translate.bleu_score
 import torch
 from torch import nn, optim
 from torch.utils.data import DataLoader
@@ -14,8 +12,6 @@ from functools import partial
 from model import SimpleNMT
 from xmlrpc.client import MAXINT
 import argparse
-
-sys.path.append("..")
 from utils import Vocab, TranslationDataset, format_sentence, compute_bleu
 
 parser = argparse.ArgumentParser(prog="simple seq2seq")
@@ -141,7 +137,7 @@ def train():
     print("The best model's loss:", min_loss)
 
 
-train()   # 训练完成后请注释此行代码
+# train()   # 训练完成后请注释此行代码
 
 model.load_state_dict(torch.load("best.pth"))
 

@@ -4,12 +4,10 @@
 # Time       ：2022/9/5 19:36
 # Description：
 """
-import sys
 from typing import List
 import torch
 from torch import nn
 from torch.nn.utils.rnn import pack_padded_sequence
-sys.path.append("..")
 from utils import Vocab
 
 

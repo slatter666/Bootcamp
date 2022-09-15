@@ -5,7 +5,7 @@
 # Description：
 """
 from typing import List, Tuple, Dict
-
+from sacrebleu import corpus_bleu
 from nltk.translate.bleu_score import corpus_bleu
 from torch.utils.data import Dataset
 
@@ -110,7 +110,7 @@ def check_sentence(src_vocab: Vocab, tgt_vocab: Vocab, data_path: str, check_idx
     print("target sentence: ", tgt_sentence)
 
 
-def format_sentence(vocab: Vocab, target: List[List[int]], length: List[int], generate: List[int]) -> Tuple[List[List[str]]]:
+def format_sentence(vocab: Vocab, target: List[List[int]], length: List[int], generate: List[int]) -> Tuple[List[List[str]], List[str]]:
     """
     将padding后的target tokens去掉<pad>，将generate的句子去掉结尾后的内容
     :param vocab: target language vocabulary
@@ -124,7 +124,7 @@ def format_sentence(vocab: Vocab, target: List[List[int]], length: List[int], ge
         # convert padded reference to original reference
         cur_tgt_tokens = target[j][:length[j]]
         cur_tgt_words = vocab.convert_tokens_to_words(cur_tgt_tokens)
-        res_tgt.append([cur_tgt_words])
+        res_tgt.append([" ".join(cur_tgt_words)])
 
         # process generated sentence
         eos = None
@@ -140,27 +140,27 @@ def format_sentence(vocab: Vocab, target: List[List[int]], length: List[int], ge
             cur_gen_words.append(".")
         else:
             cur_gen_words.append(eos)
-        res_gen.append(cur_gen_words)
+        res_gen.append(" ".join(cur_gen_words))
     return res_tgt, res_gen
 
 
-def compute_bleu(ref: List[List[List[str]]], hypo: List[List[str]]) -> float:
+def compute_bleu(ref: List[List[str]], hypo: List[str]) -> float:
     """
     计算bleu值
     :param ref: list of references
     :param hypo: hypothesis sentences
     :return: bleu score
     """
-    return corpus_bleu(ref, hypo, (1, 0, 0, 0))
+    return corpus_bleu(ref, hypo)
 
 
 if __name__ == '__main__':
-    src_vocab_file = "data/process_data/de.dict"
-    tgt_vocab_file = "data/process_data/en.dict"
+    src_vocab_file = "../data/process_data/de.dict"
+    tgt_vocab_file = "../data/process_data/en.dict"
     source_vocab = Vocab.load_from_file(src_vocab_file)
     target_vocab = Vocab.load_from_file(tgt_vocab_file)
 
-    train_file = "data/process_data/train.txt"
+    train_file = "../data/process_data/train.txt"
 
     nums = 5
     for i in range(nums):
