@@ -4,14 +4,15 @@
 # Time       ：2022/9/12 12:15
 # Description：
 """
+import argparse
+from functools import partial
+from xmlrpc.client import MAXINT
 
 import torch
 from torch import nn, optim
 from torch.utils.data import DataLoader
-from functools import partial
+
 from model import SimpleNMT
-from xmlrpc.client import MAXINT
-import argparse
 from utils import Vocab, TranslationDataset, format_sentence, compute_bleu
 
 parser = argparse.ArgumentParser(prog="simple seq2seq")
@@ -34,7 +35,7 @@ else:
 BATCH_SIZE = args.batch
 EMBED_SIZE = args.embed_size
 HIDDEN_SIZE = args.hidden_size
-MAX_LEN = args.max_len
+MAX_LEN = args.max_len  # 查了一下最大的长度有171
 LR = args.lr
 WEIGHT_DECAY = args.weight_decay
 EPOCH = args.epoch
@@ -77,7 +78,7 @@ test_dataset = TranslationDataset.load_from_file(test_file)
 collate_fn = partial(collate_batch, src_vocab=source_vocab, tgt_vocab=target_vocab)  # 这里必须一对一指定参数
 train_dataloader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True, collate_fn=collate_fn)
 val_dataloader = DataLoader(dev_dataset, batch_size=BATCH_SIZE, shuffle=False, collate_fn=collate_fn)
-test_dataloader = DataLoader(dev_dataset, batch_size=BATCH_SIZE, shuffle=False, collate_fn=collate_fn)
+test_dataloader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=False, collate_fn=collate_fn)
 
 model = SimpleNMT(source_vocab, target_vocab, EMBED_SIZE, HIDDEN_SIZE, MAX_LEN, DEVICE).to(DEVICE)
 optimizer = optim.Adam(model.parameters(), lr=LR, weight_decay=WEIGHT_DECAY)
@@ -137,7 +138,7 @@ def train():
     print("The best model's loss:", min_loss)
 
 
-# train()   # 训练完成后请注释此行代码
+train()   # 训练完成后请注释此行代码
 
 model.load_state_dict(torch.load("best.pth"))
 
@@ -157,11 +158,13 @@ def test():
             t1, t2 = format_sentence(target_vocab, target.tolist(), tgt_lengths, tokens.tolist())
             rec_ref += t1
             rec_gen += t2
+
         # 测试集计算平均loss
         print("average test loss:{:.2f}".format(test_loss / len(test_dataloader)))
 
+    rec_ref = [rec_ref]  # 转换为sacrebleu所需要的格式
     # 计算bleu值
-    bleu_score = compute_bleu(rec_ref, rec_gen)
+    bleu_score = compute_bleu(rec_gen, rec_ref)
     print("BLEU SCORE: {}".format(bleu_score))
 
 
