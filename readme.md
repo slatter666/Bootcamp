@@ -31,7 +31,7 @@
 
 3. 机器翻译分别实现 LSTM attention和transformers
 
-   机器翻译分别实现 LSTM attention（Effective approaches to attention-based neural machine translation） 和 transformers 在german-english 翻译 （[数据下载地址](http://cs.stanford.edu/~bdlijiwei/process_data.tar.gz)，LSTM 需要到 bleu值27以上，transformers 最好可以超过30
+   机器翻译分别实现 LSTM attention ([Effective approaches to attention-based neural machine translation](https://arxiv.org/pdf/1508.04025.pdf)) 和 transformers 在german-english 翻译 （[数据下载地址](http://cs.stanford.edu/~bdlijiwei/process_data.tar.gz)，LSTM 需要到 bleu值27以上，transformers 最好可以超过30
 
 4. 复现BERT在GLUE，NLI以及NER上结果
 
