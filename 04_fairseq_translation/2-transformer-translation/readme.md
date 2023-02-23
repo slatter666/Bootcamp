@@ -105,3 +105,15 @@ Parameter indices which did not receive grad for rank 0: 1 2 3 4 5 6 7 8 25 26 2
 ```
 #### 7.多卡训练
 目前关于DDP其实也有些问题，打算先详细了解一下DDP工作流程，之后有时间准备做一个多卡的训练对比
+
+#### 8.Application
+最后用训练好的模型做一个小程序，直接`python application.py`
+```shell
+Input: 
+hier ist ein foto , das ich am nördlichen ende der Unknown aufnahm , als ich mit Unknown auf die Unknown ging . und dieser mann , Unknown , erzählte mir eine wunderbare geschichte seines großvaters .
+
+Output:
+['here &amp; apos ; s a photograph i took in the northern hemisphere when i went to mit , and this man , Unknown , told me a wonderful story of his grandfather &amp; apos ; s grandfather .']
+here &amp; apos ; s a photograph i took in the northern hemisphere when i went to mit , and this man , Unknown , told me a wonderful story of his grandfather &amp; apos ; s grandfather .
+```
+后面的玩法就很多了可以自行发挥，流程走完也可以用WMT的数据进行训练，那个数据集的数据量和质量都要好一点
