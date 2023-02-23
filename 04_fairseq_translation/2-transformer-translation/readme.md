@@ -66,14 +66,14 @@ python build_dict.py
 - 此处实现的Transformer seq2seq模型，模型以及任务代码均放置在my_fairseq_module中，代码细节这里就不详述了
 - 需要确保自己项目文件下已经创建好了checkpoints文件，没有则执行命令```mkdir checkpoints```进行创建
 - 运行脚本```sh train.sh```开始训练
-- 这里训练配置是一块3090，多卡要报错之后再解决，只要batch size设置的合理平均一轮也就一两分钟
+- 这里训练配置是一块3090，只要batch size设置的合理平均一轮也就一两分钟
 
 #### 4.模型测试
 - 解码单卡几十秒就能跑完beam search=4的inference，总的来说用bpe会比不用bpe提升好几个点
 - 运行脚本```sh evaluate.sh```进行测试
 
 #### 5.模型效果
-- 下面记录跑过的一些实验，以及关于调参的一些经验
+- 下面记录跑过的一些实验，以及关于调参的一些经验(所有结果均使用单卡训练)
 - 为了达到同一个结果，在增大batch size的时候需要等比例增大learning rate(比如batch size从2000增大到4000，那么学习率也需要从5e-4增大到1e-3)
 - transformer的训练必须要使用warmup，否则会无法收敛，warmup按照论文设置为4000比较合适
 - batch size在合理范围内设置得稍微大一点，这样训练就会更快，因为不用做那么多次反向传播
@@ -90,6 +90,18 @@ python build_dict.py
 | Transformer  |     5e-4      |    4000    |      8000      |  20   |     Default     | 31.01 |
 | Transformer  |     5e-4      |    4000    |     12000      |  20   |     Default     | 31.11 |
 
-
-
-
+#### 6.遇到的问题
+1. 采用多卡训练会存在下面这个问题, 这个问题是因为tensor在进程spawn时的共享内存解决的不够好。如果我们提前把所有数据以tensor的形式存入到NMTDataset的__init__函数中， 那么当我们想要并行的时候，就需要并行这部分内存，就会遇到这个问题。 解决方法很简单，在__init__函数中存numpy形式的数据，在__getitem__里返回的时候再转成tensor。 详情见my_fairseq_module/task/nmt_task.py，无法并行的代码已经注释
+```shell
+RuntimeError: unable to open shared memory object </torch_62908_3146484211_4015> in read-write mode: Too many open files (24)
+```
+2. 上面的问题解决了之后，又会出现另一个问题，只需要在train.sh中加上`--find-unused-parameters`就好了，我这里已经加上了
+```shell
+RuntimeError: Expected to have finished reduction in the prior iteration before starting a new one. This error indicates that your module has parameters that were not used in producing loss. You can enable unused parameter detection by passing the keyword argument `find_unused_parameters=True` to `torch.nn.parallel.DistributedDataParallel`, and by 
+making sure all `forward` function outputs participate in calculating loss. 
+If you already have done the above, then the distributed data parallel module wasn't able to locate the output tensors in the return value of your module's `forward` function. Please include the loss function and the structure of the return value of `forward` of your module when reporting this issue (e.g. list, dict, iterable).
+Parameter indices which did not receive grad for rank 0: 1 2 3 4 5 6 7 8 25 26 27 28 29 30 31 32 49 50 51 52 53 54 55 56 73 74 75 76 77 78 79 80 97 98 99 100 101 102 103 104 121 122 123 124 125 126 127 128
+ In addition, you can set the environment variable TORCH_DISTRIBUTED_DEBUG to either INFO or DETAIL to print out information about which particular parameters did not receive gradient on this rank as part of this error
+```
+#### 7.多卡训练
+目前关于DDP其实也有些问题，打算先详细了解一下DDP工作流程，之后有时间准备做一个多卡的训练对比

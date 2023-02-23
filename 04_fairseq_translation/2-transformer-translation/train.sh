@@ -9,5 +9,5 @@ fairseq-train $DATA \
   --max-epoch 20 --save-interval 10 \
   --save-dir checkpoints --log-file checkpoints/logfile --tensorboard-logdir checkpoints/logs \
   --skip-invalid-size-inputs-valid-test \
-  --fp16
+  --fp16 --find-unused-parameters
 # Generate test with beam=4: BLEU4 = 32.50, 63.0/38.7/26.2/18.2 (BP=0.990, ratio=0.990, syslen=141130, reflen=142528)

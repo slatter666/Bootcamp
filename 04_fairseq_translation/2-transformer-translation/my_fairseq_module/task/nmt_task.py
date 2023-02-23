@@ -6,6 +6,8 @@
 """
 import os
 import json
+
+import numpy
 import torch
 import numpy as np
 
@@ -16,9 +18,10 @@ from fairseq.tasks.translation import TranslationTask, TranslationConfig
 
 class NMTDataset(FairseqDataset):
     def __init__(self, tokens_list):
-        self.tokens_list = [torch.LongTensor(tokens) for tokens in tokens_list]
+        # 第一版: self.tokens_list = [torch.LongTensor(tokens) for tokens in tokens_list]
+        self.tokens_list = [tokens for tokens in tokens_list]
         self.sizes = np.array([len(tokens) for tokens in tokens_list])
-        self.size = len(self.tokens_list)
+        self.size = len(tokens_list)
 
     def check_index(self, i):
         if i < 0 or i >= self.size:
@@ -26,7 +29,8 @@ class NMTDataset(FairseqDataset):
 
     def __getitem__(self, i):
         self.check_index(i)
-        return self.tokens_list[i]
+        # 第一版: return self.tokens_list[i]
+        return torch.LongTensor(self.tokens_list[i])
 
     def __del__(self):
         pass
